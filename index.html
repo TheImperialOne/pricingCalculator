@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Pricing Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Recipe Pricing Calculator</h1>
+    <div id="calculator">
+        <label for="ingredient">Select Ingredient:</label>
+        <select id="ingredient"></select>
+        <label for="quantity">Quantity (grams/ml):</label>
+        <input type="number" id="quantity" min="1" placeholder="Enter quantity">
+        <button onclick="addIngredient()">Add Ingredient</button>
+    </div>
+    
+    <h2>Recipe Ingredients</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Ingredient</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="ingredient-list"></tbody>
+    </table>
+    <h2>Total Cost: ₹<span id="total-cost">0</span></h2>
+    
+    <script>
+        let ingredients = {};
+        
+        async function fetchIngredients() {
+            const url = 'https://opensheet.elk.sh/1eO5rxYfo_QSJCZ-tqMlTYitIMYp6w8WafugLK9SMSsA/Master1';
+            const response = await fetch(url);
+            const data = await response.json();
+            data.forEach(item => {
+                if (item.Ingredient && item.Price) {
+                    ingredients[item.Ingredient] = parseFloat(item.Price) / 1000; // Convert price per KG to price per gram/ml
+                    let option = document.createElement("option");
+                    option.value = item.Ingredient;
+                    option.textContent = item.Ingredient;
+                    document.getElementById("ingredient").appendChild(option);
+                }
+            });
+        }
+        
+        function addIngredient() {
+            const ingredient = document.getElementById("ingredient").value;
+            const quantity = parseFloat(document.getElementById("quantity").value);
+            if (!ingredient || isNaN(quantity) || quantity <= 0) return;
+            
+            const price = ingredients[ingredient] * quantity; // Price is now per gram/ml
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${ingredient}</td>
+                <td>${quantity} g/ml</td>
+                <td>₹${price.toFixed(2)}</td>
+                <td><button onclick="removeIngredient(this, ${price})">Remove</button></td>
+            `;
+            document.getElementById("ingredient-list").appendChild(row);
+            updateTotal(price);
+        }
+        
+        function removeIngredient(button, price) {
+            button.parentElement.parentElement.remove();
+            updateTotal(-price);
+        }
+        
+        function updateTotal(amount) {
+            const totalElement = document.getElementById("total-cost");
+            totalElement.textContent = (parseFloat(totalElement.textContent) + amount).toFixed(2);
+        }
+        
+        fetchIngredients();
+    </script>
+</body>
+</html>
