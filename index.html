@@ -21,25 +21,68 @@
         <thead>
             <tr>
                 <th>Ingredient</th>
-                <th>Quantity</th>
-                <th>Price</th>
+                <th>Quantity (g/ml)</th>
+                <th>Price (₹)</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody id="ingredient-list"></tbody>
     </table>
-    <h2>Total Cost: ₹<span id="total-cost">0</span></h2>
+    
+    <h2>Spillage</h2>
+    <label for="spillage">Spillage (%):</label>
+    <input type="number" id="spillage" min="0" max="100" placeholder="Enter spillage %" oninput="calculateActualWeight()">
+    
+    <h2>Ingredient Cost: ₹<span id="total-cost">0</span></h2>
+    <h2>Expected Weight: <span id="total-weight">0</span> g/ml</h2>
+    <h2>Actual Weight After Spillage: <span id="final-weight">0</span> g/ml</h2>
+    
+    <h2>Additional Costs</h2>
+    <label for="bake-time">Time Taken to Bake (minutes):</label>
+    <input type="number" id="bake-time" min="0" placeholder="Enter baking time" oninput="calculateFinalAmount()">
+    
+    <label for="oven-cost">Oven Charges per Hour (₹):</label>
+    <input type="number" id="oven-cost" min="0" placeholder="Enter oven charges" oninput="calculateFinalAmount()">
+    
+    <label for="labour-time">Labour Work Time (minutes):</label>
+    <input type="number" id="labour-time" min="0" placeholder="Enter labour work time" oninput="calculateFinalAmount()">
+    
+    <label for="labour-cost">Labour Charges per Hour (₹):</label>
+    <input type="number" id="labour-cost" min="0" placeholder="Enter labour charges" oninput="calculateFinalAmount()">
+    
+    <label for="transport">Transport (₹):</label>
+    <input type="number" id="transport" min="0" placeholder="Enter transport cost" oninput="calculateFinalAmount()">
+    
+    <label for="packaging">Label/Packaging (₹):</label>
+    <input type="number" id="packaging" min="0" placeholder="Enter packaging cost" oninput="calculateFinalAmount()">
+    
+    <label for="marketing">Marketing (₹):</label>
+    <input type="number" id="marketing" min="0" placeholder="Enter marketing cost" oninput="calculateFinalAmount()">
+    
+    <h2>Final Amount: ₹<span id="final-amount">0</span></h2>
+    
+    <h2>Profit Markup</h2>
+    <label for="profit-percentage">Profit Markup (%):</label>
+    <input type="number" id="profit-percentage" min="0" placeholder="Enter profit markup %" oninput="calculateProfitMarkup()">
+    <h2>Profit Markup Price: ₹<span id="profit-price">0</span></h2>
+    
+    <h2>Store Price</h2>
+    <label for="store-percentage">Store Markup (%):</label>
+    <input type="number" id="store-percentage" min="0" placeholder="Enter store markup %" oninput="calculateStorePrice()">
+    <h2>Store Price: ₹<span id="store-price">0</span></h2>
     
     <script>
         let ingredients = {};
-        
+        let totalWeight = 0;
+        let totalCost = 0;
+
         async function fetchIngredients() {
             const url = 'https://opensheet.elk.sh/1eO5rxYfo_QSJCZ-tqMlTYitIMYp6w8WafugLK9SMSsA/Master1';
             const response = await fetch(url);
             const data = await response.json();
             data.forEach(item => {
                 if (item.Ingredient && item.Price) {
-                    ingredients[item.Ingredient] = parseFloat(item.Price) / 1000; // Convert price per KG to price per gram/ml
+                    ingredients[item.Ingredient] = parseFloat(item.Price) / 1000;
                     let option = document.createElement("option");
                     option.value = item.Ingredient;
                     option.textContent = item.Ingredient;
@@ -47,34 +90,80 @@
                 }
             });
         }
-        
-        function addIngredient() {
-            const ingredient = document.getElementById("ingredient").value;
-            const quantity = parseFloat(document.getElementById("quantity").value);
-            if (!ingredient || isNaN(quantity) || quantity <= 0) return;
-            
-            const price = ingredients[ingredient] * quantity; // Price is now per gram/ml
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${ingredient}</td>
-                <td>${quantity} g/ml</td>
-                <td>₹${price.toFixed(2)}</td>
-                <td><button onclick="removeIngredient(this, ${price})">Remove</button></td>
-            `;
-            document.getElementById("ingredient-list").appendChild(row);
-            updateTotal(price);
+function addIngredient() {
+            let ingredient = document.getElementById("ingredient").value;
+            let quantity = parseFloat(document.getElementById("quantity").value);
+            if (!ingredient || !quantity) return;
+            let price = (ingredients[ingredient] * quantity).toFixed(2);
+            totalWeight += quantity;
+            totalCost += parseFloat(price);
+            document.getElementById("total-weight").textContent = totalWeight;
+            document.getElementById("total-cost").textContent = totalCost.toFixed(2);
+            let row = `<tr>
+                        <td>${ingredient}</td>
+                        <td>${quantity}</td>
+                        <td>${price}</td>
+                        <td><button onclick="removeIngredient(this, ${quantity}, ${price})">Remove</button></td>
+                      </tr>`;
+            document.getElementById("ingredient-list").innerHTML += row;
+            calculateFinalAmount();
         }
-        
-        function removeIngredient(button, price) {
+
+        function removeIngredient(button, quantity, price) {
             button.parentElement.parentElement.remove();
-            updateTotal(-price);
+            totalWeight -= quantity;
+            totalCost -= price;
+            document.getElementById("total-weight").textContent = totalWeight;
+            document.getElementById("total-cost").textContent = totalCost.toFixed(2);
+            calculateFinalAmount();
         }
-        
-        function updateTotal(amount) {
-            const totalElement = document.getElementById("total-cost");
-            totalElement.textContent = (parseFloat(totalElement.textContent) + amount).toFixed(2);
+
+
+        function calculateFinalAmount() {
+    let bakeTime = parseFloat(document.getElementById("bake-time").value) || 0;
+    let ovenCost = parseFloat(document.getElementById("oven-cost").value) || 0;
+    let labourTime = parseFloat(document.getElementById("labour-time").value) || 0;
+    let labourCost = parseFloat(document.getElementById("labour-cost").value) || 0;
+    let transport = parseFloat(document.getElementById("transport").value) || 0;
+    let packaging = parseFloat(document.getElementById("packaging").value) || 0;
+    let marketing = parseFloat(document.getElementById("marketing").value) || 0;
+
+    let ovenCharges = (bakeTime / 60) * ovenCost;
+    let labourCharges = (labourTime / 60) * labourCost;
+
+    // Ensure actualWeight is valid before division
+    let finalAmount = actualWeight > 0 
+        ? (totalCost + ovenCharges + labourCharges + transport + packaging + marketing) / (actualWeight/1000)
+        : 0;
+
+    document.getElementById("final-amount").textContent = finalAmount.toFixed(2);
+    calculateProfitMarkup();
+}
+
+let actualWeight = 0; // Declare globally
+
+function calculateActualWeight() {
+    let spillage = parseFloat(document.getElementById("spillage").value) || 0;
+    actualWeight = totalWeight - (totalWeight * spillage / 100); // Store globally
+    document.getElementById("final-weight").textContent = actualWeight.toFixed(2);
+    calculateFinalAmount(); // Ensure final amount updates correctly
+}
+
+        function calculateProfitMarkup() {
+            let profitPercentage = parseFloat(document.getElementById("profit-percentage").value) || 0;
+            let finalAmount = parseFloat(document.getElementById("final-amount").textContent) || 0;
+            let profitPrice = finalAmount + (finalAmount * profitPercentage / 100);
+            document.getElementById("profit-price").textContent = profitPrice.toFixed(2);
+            calculateStorePrice();
         }
-        
+
+        function calculateStorePrice() {
+            let storePercentage = parseFloat(document.getElementById("store-percentage").value) || 0;
+            let profitPrice = parseFloat(document.getElementById("profit-price").textContent) || 0;
+            let storePrice = profitPrice + (profitPrice * storePercentage / 100);
+            document.getElementById("store-price").textContent = storePrice.toFixed(2);
+        }
+
         fetchIngredients();
     </script>
 </body>
