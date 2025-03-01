@@ -4,167 +4,470 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Pricing Calculator</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* General Page Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 10px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #f2b1ca, #f198b7);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .left-section, .center-section, .right-section {
+            flex: 1;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .bottom-section {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+        }
+
+        /* Input and Select Styling */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            color: #444;
+        }
+
+        input, select {
+            padding: 8px;
+            border: 2px solid #f2b1ca;
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            border-color: #f198b7;
+            box-shadow: 0 0 8px rgba(242, 177, 202, 0.5);
+        }
+
+        /* Button Styling */
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .primary-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .danger-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2b1ca;
+            color: white;
+        }
+
+        /* Scrollable Table */
+        .scrollable-table {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+
+        /* Dialog Box */
+        .dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dialog-content {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 20px;
+            cursor: pointer;
+            color: #ff0000;
+        }
+
+        .close-btn:hover {
+            color: #cc0000;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+            }
+
+            .left-section, .center-section, .right-section {
+                width: 100%;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 6px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Recipe Pricing Calculator</h1>
-    <div id="calculator">
-        <label for="ingredient">Select Ingredient:</label>
-        <select id="ingredient"></select>
-        <label for="quantity">Quantity (grams/ml):</label>
-        <input type="number" id="quantity" min="1" placeholder="Enter quantity">
-        <button onclick="addIngredient()">Add Ingredient</button>
-    </div>
-    
-    <h2>Recipe Ingredients</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Ingredient</th>
-                <th>Quantity (g/ml)</th>
-                <th>Price (₹)</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="ingredient-list"></tbody>
-    </table>
-    
-    <h2>Spillage</h2>
-    <label for="spillage">Spillage (%):</label>
-    <input type="number" id="spillage" min="0" max="100" placeholder="Enter spillage %" oninput="calculateActualWeight()">
-    
-    <h2>Ingredient Cost: ₹<span id="total-cost">0</span></h2>
-    <h2>Expected Weight: <span id="total-weight">0</span> g/ml</h2>
-    <h2>Actual Weight After Spillage: <span id="final-weight">0</span> g/ml</h2>
-    
-    <h2>Additional Costs</h2>
-    <label for="bake-time">Time Taken to Bake (minutes):</label>
-    <input type="number" id="bake-time" min="0" placeholder="Enter baking time" oninput="calculateFinalAmount()">
-    
-    <label for="oven-cost">Oven Charges per Hour (₹):</label>
-    <input type="number" id="oven-cost" min="0" placeholder="Enter oven charges" oninput="calculateFinalAmount()">
-    
-    <label for="labour-time">Labour Work Time (minutes):</label>
-    <input type="number" id="labour-time" min="0" placeholder="Enter labour work time" oninput="calculateFinalAmount()">
-    
-    <label for="labour-cost">Labour Charges per Hour (₹):</label>
-    <input type="number" id="labour-cost" min="0" placeholder="Enter labour charges" oninput="calculateFinalAmount()">
-    
-    <label for="transport">Transport (₹):</label>
-    <input type="number" id="transport" min="0" placeholder="Enter transport cost" oninput="calculateFinalAmount()">
-    
-    <label for="packaging">Label/Packaging (₹):</label>
-    <input type="number" id="packaging" min="0" placeholder="Enter packaging cost" oninput="calculateFinalAmount()">
-    
-    <label for="marketing">Marketing (₹):</label>
-    <input type="number" id="marketing" min="0" placeholder="Enter marketing cost" oninput="calculateFinalAmount()">
-    
-    <h2>Final Amount: ₹<span id="final-amount">0</span></h2>
-    
-    <h2>Profit Markup</h2>
-    <label for="profit-percentage">Profit Markup (%):</label>
-    <input type="number" id="profit-percentage" min="0" placeholder="Enter profit markup %" oninput="calculateProfitMarkup()">
-    <h2>Profit Markup Price: ₹<span id="profit-price">0</span></h2>
-    
-    <h2>Store Price</h2>
-    <label for="store-percentage">Store Markup (%):</label>
-    <input type="number" id="store-percentage" min="0" placeholder="Enter store markup %" oninput="calculateStorePrice()">
-    <h2>Store Price: ₹<span id="store-price">0</span></h2>
-    
-    <script>
-        let ingredients = {};
-        let totalWeight = 0;
-        let totalCost = 0;
+<h1>Recipe Pricing Calculator</h1>
+<button id="view-master-list" class="btn primary-btn">View Master List</button>
 
-        async function fetchIngredients() {
-            const url = 'https://opensheet.elk.sh/1eO5rxYfo_QSJCZ-tqMlTYitIMYp6w8WafugLK9SMSsA/Master1';
-            const response = await fetch(url);
-            const data = await response.json();
-            data.forEach(item => {
-                if (item.Ingredient && item.Price) {
-                    ingredients[item.Ingredient] = parseFloat(item.Price) / 1000;
-                    let option = document.createElement("option");
-                    option.value = item.Ingredient;
-                    option.textContent = item.Ingredient;
-                    document.getElementById("ingredient").appendChild(option);
-                }
-            });
+<!-- Dialog Box -->
+<div id="master-list-dialog" class="dialog">
+    <div class="dialog-content">
+        <span class="close-btn" onclick="closeDialog()">&times;</span>
+        <h2>Master Ingredient List</h2>
+        <div class="scrollable-table">
+            <table>
+                <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Price (₹/kg)</th>
+                </tr>
+                </thead>
+                <tbody id="master-list-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="main-layout">
+    <!-- Left Section: Ingredients Selection Panel and Display Table -->
+    <div class="left-section">
+        <div class="input-group">
+            <label for="ingredient">Select Ingredient:</label>
+            <select id="ingredient"></select>
+        </div>
+        <div class="input-group">
+            <label for="quantity">Quantity (grams/ml):</label>
+            <input type="number" id="quantity" min="1" placeholder="Enter quantity" oninput="validateInput('quantity')">
+        </div>
+        <button class="btn primary-btn" onclick="addIngredient()">Add Ingredient</button>
+
+        <h2>Recipe Ingredients</h2>
+        <div class="scrollable-table">
+            <table>
+                <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Quantity (g/ml)</th>
+                    <th>Price (₹)</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="ingredient-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Center Section: Recipe Builder & Spillage Adjustment -->
+    <div class="center-section">
+        <h2>Spillage</h2>
+        <div class="input-group">
+            <label for="spillage">Spillage (%):</label>
+            <input type="number" id="spillage" min="0" max="100" placeholder="Enter spillage %"
+                   oninput="validateInput('spillage'); calculateActualWeight()">
+        </div>
+
+        <h2>Ingredient Cost: ₹<span id="total-cost">0</span></h2>
+        <h2>Expected Weight: <span id="total-weight">0</span> g/ml</h2>
+        <h2>Actual Weight After Spillage: <span id="final-weight">0</span> g/ml</h2>
+    </div>
+
+    <!-- Right Section: Additional Costs & Profit Markup -->
+    <div class="right-section">
+        <h2>Additional Costs</h2>
+        <div class="input-group">
+            <label for="bake-time">Time Taken to Bake (minutes):</label>
+            <input type="number" id="bake-time" min="0" placeholder="Enter baking time"
+                   oninput="validateInput('bake-time'); calculateFinalAmount()">
+        </div>
+        <div class="input-group">
+            <label for="oven-cost">Oven Charges per Hour (₹):</label>
+            <input type="number" id="oven-cost" min="0" placeholder="Enter oven charges"
+                   oninput="validateInput('oven-cost'); calculateFinalAmount()">
+        </div>
+        <div class="input-group">
+            <label for="labour-time">Labour Work Time (minutes):</label>
+            <input type="number" id="labour-time" min="0" placeholder="Enter labour work time"
+                   oninput="validateInput('labour-time'); calculateFinalAmount()">
+        </div>
+        <div class="input-group">
+            <label for="labour-cost">Labour Charges per Hour (₹):</label>
+            <input type="number" id="labour-cost" min="0" placeholder="Enter labour charges"
+                   oninput="validateInput('labour-cost'); calculateFinalAmount()">
+        </div>
+        <div class="input-group">
+            <label for="transport">Transport (₹):</label>
+            <input type="number" id="transport" min="0" placeholder="Enter transport cost"
+                   oninput="validateInput('transport'); calculateFinalAmount()">
+        </div>
+        <div class="input-group">
+            <label for="packaging">Label/Packaging (₹):</label>
+            <input type="number" id="packaging" min="0" placeholder="Enter packaging cost"
+                   oninput="validateInput('packaging'); calculateFinalAmount()">
+        </div>
+        <div class="input-group">
+            <label for="marketing">Marketing (₹):</label>
+            <input type="number" id="marketing" min="0" placeholder="Enter marketing cost"
+                   oninput="validateInput('marketing'); calculateFinalAmount()">
+        </div>
+
+        <h2>Profit Markup</h2>
+        <div class="input-group">
+            <label for="profit-percentage">Profit Markup (%):</label>
+            <input type="number" id="profit-percentage" min="0" placeholder="Enter profit markup %"
+                   oninput="validateInput('profit-percentage'); calculateProfitMarkup()">
+        </div>
+        <h2>Profit Markup Price: ₹<span id="profit-price">0</span></h2>
+
+        <h2>Store Price</h2>
+        <div class="input-group">
+            <label for="store-percentage">Store Markup (%):</label>
+            <input type="number" id="store-percentage" min="0" placeholder="Enter store markup %"
+                   oninput="validateInput('store-percentage'); calculateStorePrice()">
+        </div>
+        <h2>Store Price: ₹<span id="store-price">0</span></h2>
+    </div>
+</div>
+
+<!-- Bottom Section: Final Calculation & Summary -->
+<div class="bottom-section">
+    <h2>Final Calculation</h2>
+    <h2>Final Amount: ₹<span id="final-amount">0</span></h2>
+</div>
+
+<script>
+    let ingredients = {};
+    let totalWeight = 0;
+    let totalCost = 0;
+
+    async function fetchIngredients() {
+        const url = 'https://opensheet.elk.sh/1eO5rxYfo_QSJCZ-tqMlTYitIMYp6w8WafugLK9SMSsA/Master1';
+        const response = await fetch(url);
+        const data = await response.json();
+        data.forEach(item => {
+            if (item.Ingredient && item.Price) {
+                ingredients[item.Ingredient] = parseFloat(item.Price) / 1000;
+                let option = document.createElement("option");
+                option.value = item.Ingredient;
+                option.textContent = item.Ingredient;
+                document.getElementById("ingredient").appendChild(option);
+            }
+        });
+    }
+
+    function addIngredient() {
+        let ingredient = document.getElementById("ingredient").value;
+        let quantity = parseFloat(document.getElementById("quantity").value);
+
+        if (!ingredient || !quantity || quantity <= 0) {
+            alert("Please enter a valid quantity!");
+            return;
         }
-function addIngredient() {
-            let ingredient = document.getElementById("ingredient").value;
-            let quantity = parseFloat(document.getElementById("quantity").value);
-            if (!ingredient || !quantity) return;
-            let price = (ingredients[ingredient] * quantity).toFixed(2);
-            totalWeight += quantity;
-            totalCost += parseFloat(price);
-            document.getElementById("total-weight").textContent = totalWeight;
-            document.getElementById("total-cost").textContent = totalCost.toFixed(2);
-            let row = `<tr>
+
+        let price = (ingredients[ingredient] * quantity).toFixed(2);
+        totalWeight += quantity;
+        totalCost += parseFloat(price);
+
+        document.getElementById("total-weight").textContent = totalWeight;
+        document.getElementById("total-cost").textContent = totalCost.toFixed(2);
+
+        let row = `<tr>
                         <td>${ingredient}</td>
                         <td>${quantity}</td>
                         <td>${price}</td>
                         <td><button onclick="removeIngredient(this, ${quantity}, ${price})">Remove</button></td>
                       </tr>`;
-            document.getElementById("ingredient-list").innerHTML += row;
-            calculateFinalAmount();
+
+        document.getElementById("ingredient-list").innerHTML += row;
+
+        calculateActualWeight(); // Update actual weight when ingredient is added
+        calculateFinalAmount();
+    }
+
+    function removeIngredient(button, quantity, price) {
+        button.parentElement.parentElement.remove();
+        totalWeight -= quantity;
+        totalCost -= price;
+
+        document.getElementById("total-weight").textContent = totalWeight;
+        document.getElementById("total-cost").textContent = totalCost.toFixed(2);
+
+        calculateActualWeight(); // Update actual weight when ingredient is removed
+        calculateFinalAmount();
+    }
+
+    let actualWeight = 0; // Declare globally
+
+    function calculateActualWeight() {
+        let spillage = parseFloat(document.getElementById("spillage").value) || 0;
+
+        // If spillage is 0, actual weight = expected weight
+        actualWeight = spillage === 0 ? totalWeight : totalWeight - (totalWeight * spillage / 100);
+
+        document.getElementById("final-weight").textContent = actualWeight.toFixed(2);
+        calculateFinalAmount(); // Ensure final amount updates correctly
+    }
+
+    function calculateFinalAmount() {
+        let bakeTime = parseFloat(document.getElementById("bake-time").value) || 0;
+        let ovenCost = parseFloat(document.getElementById("oven-cost").value) || 0;
+        let labourTime = parseFloat(document.getElementById("labour-time").value) || 0;
+        let labourCost = parseFloat(document.getElementById("labour-cost").value) || 0;
+        let transport = parseFloat(document.getElementById("transport").value) || 0;
+        let packaging = parseFloat(document.getElementById("packaging").value) || 0;
+        let marketing = parseFloat(document.getElementById("marketing").value) || 0;
+
+        let ovenCharges = (bakeTime / 60) * ovenCost;
+        let labourCharges = (labourTime / 60) * labourCost;
+
+        // Ensure actualWeight is valid before division
+        let finalAmount = actualWeight > 0
+            ? (totalCost + ovenCharges + labourCharges + transport + packaging + marketing) / (actualWeight / 1000)
+            : 0;
+
+        document.getElementById("final-amount").textContent = finalAmount.toFixed(2);
+        calculateProfitMarkup();
+    }
+
+    function calculateProfitMarkup() {
+        let profitPercentage = parseFloat(document.getElementById("profit-percentage").value) || 0;
+        let finalAmount = parseFloat(document.getElementById("final-amount").textContent) || 0;
+        let profitPrice = finalAmount + (finalAmount * profitPercentage / 100);
+        document.getElementById("profit-price").textContent = profitPrice.toFixed(2);
+        calculateStorePrice();
+    }
+
+    function calculateStorePrice() {
+        let storePercentage = parseFloat(document.getElementById("store-percentage").value) || 0;
+        let profitPrice = parseFloat(document.getElementById("profit-price").textContent) || 0;
+        let storePrice = profitPrice + (profitPrice * storePercentage / 100);
+        document.getElementById("store-price").textContent = storePrice.toFixed(2);
+    }
+
+    function validateInput(id) {
+        let input = document.getElementById(id);
+        let value = parseFloat(input.value);
+
+        if (isNaN(value) || value < 0) {
+            alert(`${id.replace('-', ' ')} cannot be negative! Resetting to 0.`);
+            input.value = 0;
         }
+    }
 
-        function removeIngredient(button, quantity, price) {
-            button.parentElement.parentElement.remove();
-            totalWeight -= quantity;
-            totalCost -= price;
-            document.getElementById("total-weight").textContent = totalWeight;
-            document.getElementById("total-cost").textContent = totalCost.toFixed(2);
-            calculateFinalAmount();
-        }
+    document.getElementById("view-master-list").addEventListener("click", openDialog);
 
+    async function openDialog() {
+        const url = 'https://opensheet.elk.sh/1eO5rxYfo_QSJCZ-tqMlTYitIMYp6w8WafugLK9SMSsA/Master1';
+        const response = await fetch(url);
+        const data = await response.json();
 
-        function calculateFinalAmount() {
-    let bakeTime = parseFloat(document.getElementById("bake-time").value) || 0;
-    let ovenCost = parseFloat(document.getElementById("oven-cost").value) || 0;
-    let labourTime = parseFloat(document.getElementById("labour-time").value) || 0;
-    let labourCost = parseFloat(document.getElementById("labour-cost").value) || 0;
-    let transport = parseFloat(document.getElementById("transport").value) || 0;
-    let packaging = parseFloat(document.getElementById("packaging").value) || 0;
-    let marketing = parseFloat(document.getElementById("marketing").value) || 0;
+        let tableBody = document.getElementById("master-list-body");
+        tableBody.innerHTML = ""; // Clear previous data
 
-    let ovenCharges = (bakeTime / 60) * ovenCost;
-    let labourCharges = (labourTime / 60) * labourCost;
+        data.forEach(item => {
+            if (item.Ingredient && item.Price) {
+                let row = `<tr>
+                                <td>${item.Ingredient}</td>
+                                <td>₹${parseFloat(item.Price).toFixed(2)}</td>
+                              </tr>`;
+                tableBody.innerHTML += row;
+            }
+        });
 
-    // Ensure actualWeight is valid before division
-    let finalAmount = actualWeight > 0 
-        ? (totalCost + ovenCharges + labourCharges + transport + packaging + marketing) / (actualWeight/1000)
-        : 0;
+        document.getElementById("master-list-dialog").style.display = "flex";
+    }
 
-    document.getElementById("final-amount").textContent = finalAmount.toFixed(2);
-    calculateProfitMarkup();
-}
+    // Close Dialog Function
+    function closeDialog() {
+        document.getElementById("master-list-dialog").style.display = "none";
+    }
 
-let actualWeight = 0; // Declare globally
-
-function calculateActualWeight() {
-    let spillage = parseFloat(document.getElementById("spillage").value) || 0;
-    actualWeight = totalWeight - (totalWeight * spillage / 100); // Store globally
-    document.getElementById("final-weight").textContent = actualWeight.toFixed(2);
-    calculateFinalAmount(); // Ensure final amount updates correctly
-}
-
-        function calculateProfitMarkup() {
-            let profitPercentage = parseFloat(document.getElementById("profit-percentage").value) || 0;
-            let finalAmount = parseFloat(document.getElementById("final-amount").textContent) || 0;
-            let profitPrice = finalAmount + (finalAmount * profitPercentage / 100);
-            document.getElementById("profit-price").textContent = profitPrice.toFixed(2);
-            calculateStorePrice();
-        }
-
-        function calculateStorePrice() {
-            let storePercentage = parseFloat(document.getElementById("store-percentage").value) || 0;
-            let profitPrice = parseFloat(document.getElementById("profit-price").textContent) || 0;
-            let storePrice = profitPrice + (profitPrice * storePercentage / 100);
-            document.getElementById("store-price").textContent = storePrice.toFixed(2);
-        }
-
-        fetchIngredients();
-    </script>
+    fetchIngredients();
+</script>
 </body>
 </html>
