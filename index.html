@@ -1,29 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Pricing Calculator</title>
     <style>
         /* General Page Styling */
         body {
-            font-family: 'Arial', sans-serif;
-            padding: 10px;
+            font-family: 'Lato', sans-serif;
             margin: 0 auto;
             background: linear-gradient(135deg, #f2b1ca, #f198b7);
             color: #333;
+            padding-top: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
         }
+        /* Header Styles */
+        header {
+            text-align: center;
+            background-color: transparent; /* Make the header background transparent */
+            padding: 0; /* Remove padding */
+            border-bottom: none; /* Remove the border if it exists */
+            width: 100%; /* Ensure the header spans the full width */
+        }
+
+        header img {
+            max-width: 100px; /* Adjust the size of the logo */
+            height: auto;
+            border-radius: 10px; /* Add a slight curve to the image border */
+        }
+
+        /* Footer Styles */
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #333;
+            color: #fff;
+            font-size: 14px;
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            width: 100%; /* Make the footer span the full width */
+            position: relative; /* Ensure it stays at the bottom */
+            left: 0;
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+
+        footer a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
 
         h1 {
             text-align: center;
-            color: white;
-            font-size: 24px;
             margin-bottom: 10px;
+            padding-left: 10px;
+            padding-right: 10px;
         }
 
         /* Main Layout */
@@ -31,7 +74,7 @@
             display: flex;
             gap: 10px;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -79,6 +122,12 @@
         input:focus, select:focus {
             border-color: #f198b7;
             box-shadow: 0 0 8px rgba(242, 177, 202, 0.5);
+        }
+
+        .custom-hr {
+            border: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #f2b1ca, #f198b7);
         }
 
         /* Button Styling */
@@ -178,6 +227,10 @@
                 flex-direction: column;
             }
 
+            body{
+                padding: 10px;
+            }
+
             .left-section, .center-section, .right-section, .markup-section {
                 width: 100%;
             }
@@ -200,8 +253,10 @@
     </style>
 </head>
 <body>
-<h1>Recipe Pricing Calculator</h1>
-<button id="view-master-list" class="btn primary-btn">View Master List</button>
+<header>
+    <img src="https://storage.googleapis.com/msgsndr/WaYLZUPsCRQzHMbnXACB/media/6797bda7c21e374ac1bc4a71.jpeg" alt="Dipti Vartak Academy Logo">
+    <h1>Recipe Pricing Calculator</h1>
+</header>
 
 <!-- Dialog Box -->
 <div id="master-list-dialog" class="dialog">
@@ -225,6 +280,7 @@
 <div class="main-layout">
     <!-- Left Section: Ingredients Selection Panel and Display Table -->
     <div class="left-section">
+        <h2>Recipe Ingredients</h2>
         <div class="input-group">
             <label for="ingredient">Select Ingredient:</label>
             <select id="ingredient"></select>
@@ -233,9 +289,9 @@
             <label for="quantity">Quantity (grams/ml):</label>
             <input type="number" id="quantity" min="1" placeholder="Enter quantity" oninput="validateInput('quantity')">
         </div>
+        <button id="view-master-list" class="btn primary-btn">View Master List</button>
         <button class="btn primary-btn" onclick="addIngredient()">Add Ingredient</button>
 
-        <h2>Recipe Ingredients</h2>
         <div class="scrollable-table">
             <table>
                 <thead>
@@ -260,9 +316,9 @@
                    oninput="validateInput('spillage'); calculateActualWeight()">
         </div>
 
-        <h2>Ingredient Cost: ₹<span id="total-cost">0</span></h2>
-        <h2>Expected Weight: <span id="total-weight">0</span> g/ml</h2>
-        <h2>Actual Weight After Spillage: <span id="final-weight">0</span> g/ml</h2>
+        <h4>Ingredient Cost: ₹<span id="total-cost">0</span></h4>
+        <h4>Expected Weight: <span id="total-weight">0</span> g/ml</h4>
+        <h4>Actual Weight After Spillage: <span id="final-weight">0</span> g/ml</h4>
     </div>
 
     <!-- Right Section: Additional Costs -->
@@ -273,7 +329,10 @@
             <input type="number" id="bake-time" min="0" placeholder="Enter baking time"
                    oninput="validateInput('bake-time'); calculateFinalAmount()">
         </div>
-        <h3>Oven Charges: ₹<span id="oven-charges">0</span></h3>
+        <h4>Oven Charges: ₹<span id="oven-charges">0</span></h4>
+
+        <hr class="custom-hr">
+
         <div class="input-group">
             <label for="labour-time">Labour Work Time (minutes):</label>
             <input type="number" id="labour-time" min="0" placeholder="Enter labour work time"
@@ -284,7 +343,11 @@
             <input type="number" id="labour-cost" min="0" placeholder="Enter labour charges"
                    oninput="validateInput('labour-cost'); calculateFinalAmount()">
         </div>
-        <h3>Labour Charges: ₹<span id="labour-charges">0</span></h3>
+        <h4>Labour Charges: ₹<span id="labour-charges">0</span></h4>
+    </div>
+
+    <div class="right-section">
+        <h2>Miscellaneous Costs</h2>
         <div class="input-group">
             <label for="transport">Transport (₹):</label>
             <input type="number" id="transport" min="0" placeholder="Enter transport cost"
@@ -310,23 +373,30 @@
             <input type="number" id="profit-percentage" min="0" placeholder="Enter profit markup %"
                    oninput="validateInput('profit-percentage'); calculateProfitMarkup()">
         </div>
-        <h2>Profit Markup Price: ₹<span id="profit-price">0</span></h2>
+        <h4>Profit Markup Price: ₹<span id="profit-price">0</span></h4>
 
-        <h2>Store Price</h2>
+        <hr class="custom-hr">
+
         <div class="input-group">
             <label for="store-percentage">Store Markup (%):</label>
             <input type="number" id="store-percentage" min="0" placeholder="Enter store markup %"
                    oninput="validateInput('store-percentage'); calculateStorePrice()">
         </div>
-        <h2>Store Price: ₹<span id="store-price">0</span></h2>
+        <h4>Store Price: ₹<span id="store-price">0</span></h4>
     </div>
 </div>
 
 <!-- Bottom Section: Final Calculation & Summary -->
 <div class="bottom-section">
     <h2>Final Calculation</h2>
-    <h2>Final Amount: ₹<span id="final-amount">0</span></h2>
+    <h3>Final Amount: ₹<span id="final-amount">0</span></h3>
 </div>
+
+<footer>
+    <img src="https://storage.googleapis.com/msgsndr/WaYLZUPsCRQzHMbnXACB/media/6797bda7c21e374ac1bc4a71.jpeg" alt="Dipti Vartak Academy Logo" width="75px" height="75px">
+    <p>2025 Dipti Vartak Academy - All Rights Reserved</p>
+    <p><a href="mailto:support@diptivartakacademy.com">support@diptivartakacademy.com</a></p>
+</footer>
 
 <script>
     let ingredients = {};
